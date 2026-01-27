@@ -1,0 +1,18 @@
+import {Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {BrandJsonModel} from './models';
+import {lastValueFrom} from 'rxjs';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class ApiService {
+  serverUrl = "http://localhost:3000/";
+
+  constructor(public http: HttpClient,) {
+  }
+
+  async getAllBrands(): Promise<BrandJsonModel> {
+    return await lastValueFrom(this.http.get<BrandJsonModel>(this.serverUrl + 'getAllBrands'));
+  }
+}
