@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {BrandJsonModel} from './models';
+import {BrandJsonModel} from '../../../../library/src/models';
 import {lastValueFrom} from 'rxjs';
 
 @Injectable({
