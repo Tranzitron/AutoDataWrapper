@@ -1,5 +1,5 @@
 import {ScraperEngine} from './ScraperEngine';
-import {BrandJsonModel} from './models';
+import {BrandJsonModel} from '../../../library/src/models';
 import {fileExistsAsync, writeToFile} from './fileWriter';
 import path from 'path';
 import fs from 'fs/promises';

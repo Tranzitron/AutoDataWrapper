@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {BrandViewModel} from '../../data/models';
+import {BrandViewModel} from '../../../../../library/src/models';
 import {Router} from '@angular/router';
 
 @Component({
