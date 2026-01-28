@@ -19,12 +19,12 @@ export interface BrandJsonModel {
   scrapedAt: string,
   sourceUrl: string,
   brands: {
-    href: string | null,
+    href: string,
     name: string,
   }[],
 }
 
 export interface BrandViewModel {
-  href: string | null
+  href: string
   name: string
 }
