@@ -1,17 +1,17 @@
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {BrandJsonModel, BrandViewModel} from '../../../../library/src/models';
 import {ApiService} from '../data/api.service';
-import {BrandItem} from './brand-item/brand-item';
+import {AllBrandsItemComponent} from './allbrands-item/all-brands-item.component';
 
 @Component({
   selector: 'app-brands',
   imports: [
-    BrandItem
+    AllBrandsItemComponent
   ],
-  templateUrl: './brands.html',
-  styleUrl: './brands.css',
+  templateUrl: './all-brands.component.html',
+  styleUrl: './all-brands.component.css',
 })
-export class Brands implements OnInit {
+export class AllBrandsComponent implements OnInit {
   brands: BrandViewModel[] = [];
 
   constructor(public api: ApiService, private changeDetector: ChangeDetectorRef) {

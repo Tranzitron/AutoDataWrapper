@@ -3,12 +3,12 @@ import {BrandViewModel} from '../../../../../library/src/models';
 import {Router} from '@angular/router';
 
 @Component({
-  selector: 'app-brand-item',
+  selector: 'app-allbrands-item',
   imports: [],
-  templateUrl: './brand-item.html',
-  styleUrl: './brand-item.css',
+  templateUrl: './all-brands-item.component.html',
+  styleUrl: './all-brands-item.component.css',
 })
-export class BrandItem {
+export class AllBrandsItemComponent {
   @Input({required: true}) item!: BrandViewModel;
 
   constructor(public router: Router) {

@@ -1,13 +1,12 @@
 import {Component, signal} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
-import {Brands} from './brands/brands';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Brands],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  imports: [RouterOutlet],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css'
 })
-export class App {
+export class AppComponent {
   protected readonly title = signal('AutoDataWrapper');
 }

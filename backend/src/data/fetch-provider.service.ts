@@ -57,7 +57,7 @@ export class FetchProvider {
 
             return Array.from(links)
                 .map((a) => {
-                    const href = a.getAttribute('href');
+                    const href = a.getAttribute('href')?.split('/')[2];
                     const brandName = a.querySelector('strong')?.textContent?.trim();
 
                     return {
