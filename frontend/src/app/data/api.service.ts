@@ -13,6 +13,10 @@ export class ApiService {
   }
 
   async getAllBrands(): Promise<BrandJsonModel> {
-    return await lastValueFrom(this.http.get<BrandJsonModel>(this.serverUrl + 'getAllBrands'));
+    return await lastValueFrom(this.http.get<BrandJsonModel>(this.serverUrl + 'brands'));
+  }
+
+  async getBrand(brandId: number): Promise<BrandJsonModel> {
+    return await lastValueFrom(this.http.get<BrandJsonModel>(this.serverUrl + 'getBrand/' + brandId));
   }
 }

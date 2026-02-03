@@ -15,11 +15,12 @@ export class FetchProvider {
         });
     }
 
+    //#region Public Service Calls
     async getBrands(): Promise<BrandJsonModel> {
         try {
-            let dataResult: BrandJsonModel = await this.readBrandLinks();
+            let dataResult: BrandJsonModel = await this.getStoredBrands();
             if (dataResult.brands.length == 0) {
-                dataResult = await this.scrapeBrandLinks();
+                dataResult = await this.scrapeBrands();
                 await writeToFile(dataResult, this.brandsFileName);
             }
             return dataResult;
@@ -28,7 +29,25 @@ export class FetchProvider {
         }
     }
 
-    private async readBrandLinks(): Promise<BrandJsonModel> {
+    // async getModelsByBrandId(brandId: number): Promise<any> {
+    //     try {
+    //         let dataResult: BrandJsonModel = await this.getStoredBrands();
+    //         if (dataResult.brands.length == 0) {
+    //             dataResult = await this.scrapeBrands();
+    //             await writeToFile(dataResult, this.brandsFileName);
+    //         } else {
+    //             let models = dataResult.brands.filter(brand => brand.href == brandId);
+    //         }
+    //         return dataResult;
+    //     } finally {
+    //         await this.scraper.close();
+    //     }
+    // }
+
+    //#endregion
+
+    //#region Stored calls
+    private async getStoredBrands(): Promise<BrandJsonModel> {
         const filePath = path.join(process.cwd(), 'output', this.brandsFileName);
         let data: string = '';
         if (await fileExistsAsync(filePath)) {
@@ -46,7 +65,10 @@ export class FetchProvider {
         return jsonData || [];
     }
 
-    private async scrapeBrandLinks(): Promise<BrandJsonModel> {
+    //#endregion
+
+    //#region Scraping calls
+    private async scrapeBrands(): Promise<BrandJsonModel> {
         const url = 'https://www.auto-data.net/en/allbrands';
 
         await this.scraper.initialize();
@@ -74,4 +96,6 @@ export class FetchProvider {
             brands: brandLinks,
         };
     }
+
+    //#endregion
 }
