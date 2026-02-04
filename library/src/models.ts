@@ -18,10 +18,7 @@ export interface Brand {
 export interface BrandJsonModel {
     scrapedAt: string,
     sourceUrl: string,
-    brands: {
-        href: string,
-        name: string,
-    }[],
+    brands: Brand[],
 }
 
 export interface BrandViewModel {

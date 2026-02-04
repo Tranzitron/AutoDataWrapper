@@ -12,8 +12,8 @@ export class ApiService {
   constructor(public http: HttpClient,) {
   }
 
-  async getAllBrands(): Promise<BrandJsonModel> {
-    return await lastValueFrom(this.http.get<BrandJsonModel>(this.serverUrl + 'brands'));
+  async getAllBrands(): Promise<any> {
+    return await lastValueFrom(this.http.get<any>(this.serverUrl + 'brands'));
   }
 
   async getBrand(brandId: number): Promise<BrandJsonModel> {

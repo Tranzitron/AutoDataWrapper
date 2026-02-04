@@ -1,5 +1,4 @@
 import {Component, Input} from '@angular/core';
-import {BrandViewModel} from '../../../../../library/src/models';
 import {Router} from '@angular/router';
 
 @Component({
@@ -9,7 +8,7 @@ import {Router} from '@angular/router';
   styleUrl: './all-brands-item.component.css',
 })
 export class AllBrandsItemComponent {
-  @Input({required: true}) item!: BrandViewModel;
+  @Input({required: true}) item!: any;
 
   constructor(public router: Router) {
   }

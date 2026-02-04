@@ -18,7 +18,8 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [latest]
+        node-version: [24]
+        # Version 24 being the latest LTS version as of 03/02/2026
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:

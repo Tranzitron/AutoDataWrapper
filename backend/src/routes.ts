@@ -4,10 +4,8 @@ import {FetchProvider} from "./data/fetch-provider.service";
 const router = Router();
 let fetchProvider: FetchProvider;
 
-router.get('/brands', (req: Request, res: Response) => {
-    getProvider().getBrands().then((data: any) => {
-        res.json(data);
-    });
+router.get('/brands', async (req: Request, res: Response) => {
+    res.json(await getProvider().getBrands());
 });
 
 // router.get('/brand/:brandId', (req: Request, res: Response) => {
