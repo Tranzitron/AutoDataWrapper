@@ -1,18 +1,37 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ApiService} from '../data/api.service';
+import {BrandItemComponent} from './brand-item.component/brand-item.component';
+import {Brand, Model} from '../../../../library/src/models'
 
 @Component({
-  selector: 'app-brand.component',
-  imports: [],
+  selector: 'app-brand',
+  imports: [
+    BrandItemComponent
+  ],
   templateUrl: './brand.component.html',
   styleUrl: './brand.component.css',
 })
 export class BrandComponent implements OnInit {
+  brand: Brand | undefined;
+  models: Model[] = [];
 
-  constructor(private route: ActivatedRoute) {
+
+  constructor(private route: ActivatedRoute, public api: ApiService, public router: Router, private changeDetector: ChangeDetectorRef) {
   }
 
   async ngOnInit() {
-    let url: string = this.route.snapshot.params["id"];
+    let brandUrl: string = this.route.snapshot.params["brandId"];
+    let brandId: number = parseInt(brandUrl.split("-")[1]);
+    let tempBrand: Brand = await this.api.getBrandWithModels(brandId);
+    if (tempBrand == null) {
+      console.log(`no brand found for: ${brandUrl}`);
+      await this.router.navigate([""]);
+    }
+    this.models = tempBrand!.models;
+    tempBrand!.models = [];
+    this.brand = tempBrand!;
+
+    this.changeDetector.detectChanges();
   }
 }

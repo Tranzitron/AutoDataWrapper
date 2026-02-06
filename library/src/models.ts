@@ -1,27 +1,42 @@
-export interface Models {
-    id?: number;
-    brand_id: number;
-    name: string;
-    url: string;
-    updated_at?: Date;
-    is_active?: boolean;
-}
-
 export interface Brand {
-    id?: number;
+    id: number;
     name: string;
     url: string;
-    updated_at?: Date;
-    is_active?: boolean;
+    updatedAt: Date;
+    imageUrl?: string;
+    models: Model[];
 }
 
-export interface BrandJsonModel {
-    scrapedAt: string,
-    sourceUrl: string,
-    brands: Brand[],
+export interface Model {
+    id: number;
+    name: string;
+    url: string;
+    updatedAt: Date;
+    startYear: Date;
+    endYear: Date;
+    imageUrl: string;
+    brand: Brand;
+    generations: Generation[];
 }
 
-export interface BrandViewModel {
-    href: string
-    name: string
+export interface Generation  {
+    id: number;
+    name: string;
+    url: string;
+    updatedAt: Date;
+    startYear: Date;
+    endYear: Date;
+    imageUrl: string;
+    model: Model;
+    trims: Trim[];
+}
+
+export interface Trim  {
+    id: number;
+    name: string;
+    url: string;
+    updatedAt: Date;
+    startYear: Date;
+    endYear: Date;
+    generation: Generation;
 }

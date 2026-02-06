@@ -1,7 +1,8 @@
-import {Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn} from "typeorm";
+import {Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn} from "typeorm";
 
 //TODO TRY EntityBaseWithDate extends EntiyBase, for startYear & endYear
 export abstract class EntityBase {
+
     @PrimaryGeneratedColumn()
     id!: number;
 
@@ -11,7 +12,7 @@ export abstract class EntityBase {
     @Column()
     url: string = "";
 
-    @UpdateDateColumn()
+    @CreateDateColumn()
     updatedAt!: Date;
 }
 
@@ -23,7 +24,6 @@ export class Brand extends EntityBase {
 
     @OneToMany(() => Model, (model) => model.brand, {onDelete: "CASCADE"})
     models!: Model[]
-
 }
 
 @Entity()
@@ -43,7 +43,6 @@ export class Model extends EntityBase {
 
     @OneToMany(() => Generation, (generation) => generation.model, {onDelete: "CASCADE"})
     generations!: Generation[]
-
 }
 
 @Entity()
@@ -63,7 +62,6 @@ export class Generation extends EntityBase {
 
     @OneToMany(() => Trim, (trim) => trim.generation, {onDelete: "CASCADE"})
     trims!: Trim[];
-
 }
 
 @Entity()
@@ -77,16 +75,4 @@ export class Trim extends EntityBase {
 
     @ManyToOne(() => Generation, (generation) => generation.trims)
     generation!: Generation;
-
-}
-
-export interface BrandJsonModel {
-    scrapedAt: string,
-    sourceUrl: string,
-    brands: BrandViewModel[],
-}
-
-export interface BrandViewModel {
-    href: string
-    name: string
 }

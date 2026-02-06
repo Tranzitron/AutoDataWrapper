@@ -8,11 +8,12 @@ router.get('/brands', async (req: Request, res: Response) => {
     res.json(await getProvider().getBrands());
 });
 
-// router.get('/brand/:brandId', (req: Request, res: Response) => {
-//     getProvider().getModelsByBrandId().then((data: any) => {
-//         res.json(data);
-//     });
-// });
+router.get('/brand/:brandId', (req: Request, res: Response) => {
+    let brandId: number = parseInt(<string>req.params.brandId);
+    getProvider().getBrandWithModels(brandId).then((data: any) => {
+        res.json(data);
+    });
+});
 //
 // router.get('/brand/:brandId/models/modelId', (req: Request, res: Response) => {
 //     getProvider().getGenerationByModelId().then((data: any) => {

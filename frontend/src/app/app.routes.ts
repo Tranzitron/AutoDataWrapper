@@ -3,8 +3,10 @@ import {AllBrandsComponent} from './allbrands/all-brands.component';
 import {BrandComponent} from './brand/brand.component';
 
 export const routes: Routes = [
-  {path: 'all-brands', component: AllBrandsComponent},
-  {path: 'brand/:id', component: BrandComponent},
-  {path: '**', redirectTo: '/all-brands'},
-  {path: '*', redirectTo: '/all-brands'}
+  {path: 'brands', component: AllBrandsComponent},
+  {path: 'brand/:brandId', component: BrandComponent},
+  // {path: 'brand/:brandId/model/:modelId', component: GenerationComponent},
+  // {path: 'brand/:brandId/model/:modelId/generation/:generationId', component: TrimComponent},
+  {path: '**', redirectTo: '/brands'},
+  {path: '*', redirectTo: '/brands'}
 ];
