@@ -15,8 +15,9 @@ export class BrandItemComponent {
   }
 
   public async brandClicked() {
-    let brandName = this.item.name.replace(" ", "_");
-    let brandUrl = brandName + "-" + this.item.id;
-    await this.router.navigate(["brand", brandUrl, "model", this.item.url]);
+    let modelName = this.item.name.replace(" ", "_");
+    let modelUrl = modelName + "-" + this.item.id;
+    let url = this.router.url;
+    await this.router.navigate([url, "model", modelUrl]);
   }
 }

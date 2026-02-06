@@ -14,12 +14,14 @@ router.get('/brand/:brandId', (req: Request, res: Response) => {
         res.json(data);
     });
 });
-//
-// router.get('/brand/:brandId/models/modelId', (req: Request, res: Response) => {
-//     getProvider().getGenerationByModelId().then((data: any) => {
-//         res.json(data);
-//     });
-// });
+
+router.get('/brand/:brandId/model/:modelId', (req: Request, res: Response) => {
+    let brandId: number = parseInt(<string>req.params.brandId);
+    let modelId: number = parseInt(<string>req.params.modelId);
+    getProvider().getModelWithGenerations(modelId).then((data: any) => {
+        res.json(data);
+    });
+});
 //
 // router.get('/brand/:brandId/models/modelId/generations/generationId', (req: Request, res: Response) => {
 //     getProvider().getTrimByGenerationId().then((data: any) => {
