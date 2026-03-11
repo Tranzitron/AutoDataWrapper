@@ -87,6 +87,7 @@ export class FetchProvider {
                     generation.url = item.url;
                     generation.startYear = item.startYear;
                     generation.endYear = item.endYear;
+                    generation.chassisType = item.chassisType;
                     generation.imageUrl = "";
                     generation.model = model!;
                     generations.push(generation);
@@ -134,12 +135,18 @@ export class FetchProvider {
             },
             relations: {
                 generations: true,
+                brand: true,
             },
         });
+
         if (model == null) {
-            console.warn(`getStoredModelWithGenerations: modelId:${modelId} not found`);
+            console.warn(`getStoredModelWithGenerations: No Model for modelId:${modelId}`);
+            return null;
+        } else if (model.brand == null) {
+            console.warn(`getStoredModelWithGenerations: No Brand for modelId:${modelId}`);
             return null;
         }
+
         return model;
     }
 
@@ -164,7 +171,7 @@ export class FetchProvider {
                         url: url || ''
                     };
                 })
-                .filter((item) => item.url !== null);
+                .filter((item) => item.url);
         });
     }
 
@@ -174,7 +181,7 @@ export class FetchProvider {
         await this.scraper.initialize();
         await this.scraper.goto(url);
 
-        const modelsData = await this.scraper.page!.evaluate(() => {
+        return await this.scraper.page!.evaluate(() => {
             const modelLinks = Array.from(document.querySelectorAll('a.modeli'));
 
             return modelLinks
@@ -192,9 +199,42 @@ export class FetchProvider {
                     }
                 })
                 .filter((model) => model.url) // Filter out any entries without href;
-        });
+        })
+    }
 
-        return modelsData
+    private async scrapeGenerationsByModelUrl(modelUrl: string): Promise<any[]> {
+        const url = `https://www.auto-data.net/en/${modelUrl}`;
+
+        await this.scraper.initialize();
+        await this.scraper.goto(url);
+
+        return await this.scraper.page!.evaluate(() => {
+            const generationLinks = Array.from(document.querySelectorAll('table.generr tr.f'));
+            return generationLinks
+                .map((element) => {
+                    const top = element.querySelector('th.i > a');
+                    const name = top?.querySelector('strong')?.textContent.trim();
+                    const url = top?.getAttribute('href')?.split('/')[2];
+
+                    const bottom = element.querySelector('td.i > a');
+                    const chassisType = bottom?.querySelector('strong.chas')?.textContent.trim();
+
+                    const yearCurElement = element.querySelector('.cur');
+                    const yearEndElement = element.querySelector('.end');
+                    const year = (yearCurElement ?? yearEndElement)?.textContent?.trim();
+                    const startYear = year?.split('-')[0].trim();
+                    const endYear = year?.split('-')[1].trim();
+
+                    return {
+                        name: name || '',
+                        url: url || '',
+                        startYear: startYear || '',
+                        endYear: endYear || '',
+                        chassisType: chassisType || '',
+                    }
+                })
+                .filter((generation) => generation.url) // Filter out any entries without href;
+        })
     }
 
     private async scrapeGenerationsByModelUrl(modelUrl: string): Promise<any[]> {

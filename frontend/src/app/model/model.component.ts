@@ -1,7 +1,7 @@
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ApiService} from '../api.service';
-import {Generation, Model} from "../../../../library/src/models";
+import { Model, Generation } from "../../../../library/src/models";
 import {ModelItemComponent} from './model-item/model-item.component';
 
 @Component({
