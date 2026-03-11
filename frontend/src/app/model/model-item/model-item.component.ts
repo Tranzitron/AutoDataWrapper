@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Generation} from "../../../../../library/src/models";
+import { Generation } from "../../../../../library/src/models";
 
 @Component({
   selector: 'app-model-item',
