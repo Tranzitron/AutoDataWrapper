@@ -1,5 +1,5 @@
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {ApiService} from '../data/api.service';
+import {ApiService} from '../api.service';
 import {AllBrandsItemComponent} from './allbrands-item/all-brands-item.component';
 import {Brand} from '../../../../library/src/models'
 

@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {Model} from '../../../../../library/src/models'
 
 @Component({
@@ -11,12 +11,12 @@ import {Model} from '../../../../../library/src/models'
 export class BrandItemComponent {
   @Input({required: true}) item!: Model;
 
-  constructor(public router: Router) {
+  constructor(public router: Router, private route: ActivatedRoute) {
   }
 
-  public async brandClicked() {
-    let brandName = this.item.name.replace(" ", "_");
-    let brandUrl = brandName + "-" + this.item.id;
-    await this.router.navigate(["brand", brandUrl, "model", this.item.url]);
+  public async clicked() {
+    let modelName = this.item.name.replace(" ", "_");
+    let modelUrl = modelName + "-" + this.item.id;
+    await this.router.navigate(["model", modelUrl], {relativeTo: this.route});
   }
 }

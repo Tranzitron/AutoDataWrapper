@@ -1,6 +1,6 @@
 import "reflect-metadata"
 import {ScraperEngine} from './ScraperEngine';
-import {Brand, Model} from "../entity/entities";
+import {Brand, Generation, Model} from "../entity/entities";
 import {AppDataSource} from "../data-source";
 
 export class FetchProvider {
@@ -72,6 +72,37 @@ export class FetchProvider {
         return brand;
     }
 
+    async getModelWithGenerations(modelId: number): Promise<Model | null> {
+        let model: Model | null = null;
+        try {
+            model = await this.getStoredModelWithGenerations(modelId);
+            if (model == null) {
+                return null;
+            } else if (model.generations == null || model.generations.length == 0) {
+                const scrapedData = await this.scrapeGenerationsByModelUrl(model.url);
+                let generations: Generation[] = [];
+                scrapedData.forEach((item: any) => {
+                    let generation: Generation = new Generation();
+                    generation.name = item.name;
+                    generation.url = item.url;
+                    generation.startYear = item.startYear;
+                    generation.endYear = item.endYear;
+                    generation.imageUrl = "";
+                    generation.model = model!;
+                    generations.push(generation);
+                })
+                await AppDataSource.manager.insert(Generation, generations);
+                await AppDataSource.manager.save(generations);
+                model = await this.getStoredModelWithGenerations(modelId);
+            }
+        } catch (e) {
+            console.log(e);
+        } finally {
+            await this.scraper.close();
+        }
+        return model;
+    }
+
     //#endregion
 
     //#region Stored methods
@@ -94,6 +125,22 @@ export class FetchProvider {
             return null;
         }
         return brand;
+    }
+
+    private async getStoredModelWithGenerations(modelId: number): Promise<Model | null> {
+        const model = await AppDataSource.manager.findOne(Model, {
+            where: {
+                id: modelId,
+            },
+            relations: {
+                generations: true,
+            },
+        });
+        if (model == null) {
+            console.warn(`getStoredModelWithGenerations: modelId:${modelId} not found`);
+            return null;
+        }
+        return model;
     }
 
     //#endregion
@@ -148,6 +195,37 @@ export class FetchProvider {
         });
 
         return modelsData
+    }
+
+    private async scrapeGenerationsByModelUrl(modelUrl: string): Promise<any[]> {
+        const url = `https://www.auto-data.net/en/${modelUrl}`;
+
+        await this.scraper.initialize();
+        await this.scraper.goto(url);
+
+        const generationsData = await this.scraper.page!.evaluate(() => {
+            const generationLinks = Array.from(document.querySelectorAll('table.generr tr.f'));
+            return generationLinks
+                .map((link) => {
+                    const name = link.querySelector('strong')?.textContent;
+                    const url = link.querySelector('a')?.getAttribute('href')?.split('/')[2];
+                    const yearCur = link.querySelector('.cur')?.textContent?.trim();
+                    const yearEnd = link.querySelector('.end')?.textContent?.trim();
+                    const year = yearCur ?? yearEnd;
+                    const startYear = year?.split('-')[0].trim();
+                    const endYear = year?.split('-')[1].trim();
+
+                    return {
+                        name: name || '',
+                        url: url || '',
+                        startYear: startYear || '',
+                        endYear: endYear || '',
+                    }
+                })
+                .filter((generation) => generation.url) // Filter out any entries without href;
+        });
+
+        return generationsData
     }
 
     //#endregion
