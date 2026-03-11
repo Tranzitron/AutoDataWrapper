@@ -49,6 +49,9 @@ export class Model extends EntityBase {
 export class Generation extends EntityBase {
 
     @Column()
+    chassisType: string = "";
+
+    @Column()
     startYear: Date = new Date();
 
     @Column()

@@ -1,6 +1,6 @@
 import "reflect-metadata"
 import {ScraperEngine} from './ScraperEngine';
-import {Brand, Model} from "../entity/entities";
+import {Brand, Generation, Model} from "../entity/entities";
 import {AppDataSource} from "../data-source";
 
 export class FetchProvider {
@@ -72,6 +72,38 @@ export class FetchProvider {
         return brand;
     }
 
+    async getModelWithGenerations(modelId: number): Promise<Model | null> {
+        let model: Model | null = null;
+        try {
+            model = await this.getStoredModelWithGenerations(modelId);
+            if (model == null) {
+                return null;
+            } else if (model.generations == null || model.generations.length == 0) {
+                const scrapedData = await this.scrapeGenerationsByModelUrl(model.url);
+                let generations: Generation[] = [];
+                scrapedData.forEach((item: any) => {
+                    let generation: Generation = new Generation();
+                    generation.name = item.name;
+                    generation.url = item.url;
+                    generation.startYear = item.startYear;
+                    generation.endYear = item.endYear;
+                    generation.chassisType = item.chassisType;
+                    generation.imageUrl = "";
+                    generation.model = model!;
+                    generations.push(generation);
+                })
+                await AppDataSource.manager.insert(Generation, generations);
+                await AppDataSource.manager.save(generations);
+                model = await this.getStoredModelWithGenerations(modelId);
+            }
+        } catch (e) {
+            console.log(e);
+        } finally {
+            await this.scraper.close();
+        }
+        return model;
+    }
+
     //#endregion
 
     //#region Stored methods
@@ -96,6 +128,28 @@ export class FetchProvider {
         return brand;
     }
 
+    private async getStoredModelWithGenerations(modelId: number): Promise<Model | null> {
+        const model = await AppDataSource.manager.findOne(Model, {
+            where: {
+                id: modelId,
+            },
+            relations: {
+                generations: true,
+                brand: true,
+            },
+        });
+
+        if (model == null) {
+            console.warn(`getStoredModelWithGenerations: No Model for modelId:${modelId}`);
+            return null;
+        } else if (model.brand == null) {
+            console.warn(`getStoredModelWithGenerations: No Brand for modelId:${modelId}`);
+            return null;
+        }
+
+        return model;
+    }
+
     //#endregion
 
     //#region Scraping methods
@@ -117,7 +171,7 @@ export class FetchProvider {
                         url: url || ''
                     };
                 })
-                .filter((item) => item.url !== null);
+                .filter((item) => item.url);
         });
     }
 
@@ -127,7 +181,7 @@ export class FetchProvider {
         await this.scraper.initialize();
         await this.scraper.goto(url);
 
-        const modelsData = await this.scraper.page!.evaluate(() => {
+        return await this.scraper.page!.evaluate(() => {
             const modelLinks = Array.from(document.querySelectorAll('a.modeli'));
 
             return modelLinks
@@ -145,9 +199,42 @@ export class FetchProvider {
                     }
                 })
                 .filter((model) => model.url) // Filter out any entries without href;
-        });
+        })
+    }
 
-        return modelsData
+    private async scrapeGenerationsByModelUrl(modelUrl: string): Promise<any[]> {
+        const url = `https://www.auto-data.net/en/${modelUrl}`;
+
+        await this.scraper.initialize();
+        await this.scraper.goto(url);
+
+        return await this.scraper.page!.evaluate(() => {
+            const generationLinks = Array.from(document.querySelectorAll('table.generr tr.f'));
+            return generationLinks
+                .map((element) => {
+                    const top = element.querySelector('th.i > a');
+                    const name = top?.querySelector('strong')?.textContent.trim();
+                    const url = top?.getAttribute('href')?.split('/')[2];
+
+                    const bottom = element.querySelector('td.i > a');
+                    const chassisType = bottom?.querySelector('strong.chas')?.textContent.trim();
+
+                    const yearCurElement = element.querySelector('.cur');
+                    const yearEndElement = element.querySelector('.end');
+                    const year = (yearCurElement ?? yearEndElement)?.textContent?.trim();
+                    const startYear = year?.split('-')[0].trim();
+                    const endYear = year?.split('-')[1].trim();
+
+                    return {
+                        name: name || '',
+                        url: url || '',
+                        startYear: startYear || '',
+                        endYear: endYear || '',
+                        chassisType: chassisType || '',
+                    }
+                })
+                .filter((generation) => generation.url) // Filter out any entries without href;
+        })
     }
 
     //#endregion

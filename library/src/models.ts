@@ -24,6 +24,7 @@ export interface Generation  {
     name: string;
     url: string;
     updatedAt: Date;
+    chassisType: string;
     startYear: Date;
     endYear: Date;
     imageUrl: string;

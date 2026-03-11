@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {lastValueFrom} from 'rxjs';
-import {Brand} from "../../../../library/src/models";
+import {Brand, Model} from "../../../library/src/models";
 
 @Injectable({
   providedIn: 'root',
@@ -18,5 +18,9 @@ export class ApiService {
 
   async getBrandWithModels(brandId: number): Promise<Brand> {
     return await lastValueFrom(this.http.get<Brand>(this.serverUrl + 'brand/' + brandId));
+  }
+
+  async getModelWithGenerations(modelId: number): Promise<Model> {
+    return await lastValueFrom(this.http.get<Model>(this.serverUrl + 'model/' + modelId));
   }
 }

@@ -14,7 +14,7 @@ export class AllBrandsItemComponent {
   constructor(public router: Router) {
   }
 
-  public async brandClicked() {
+  public async clicked() {
     let brandName = this.item.name.replace(" ", "_");
     let brandUrl = brandName + "-" + this.item.id;
     await this.router.navigate(["brand", brandUrl]);
