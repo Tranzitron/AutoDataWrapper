@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Generation} from "../../../../../library/src/models";
-import {SlugifyPipe} from '../../slugify-pipe';
+import {Generation} from "../../../../../../library/src/models";
+import {SlugifyPipe} from '../../../slugify-pipe';
 
 @Component({
   selector: 'app-model-item',
@@ -19,6 +19,6 @@ export class ModelItemComponent {
   public async clicked() {
     let generationName = this.pipe.transform(this.item.name);
     let generationUrl = generationName + "-" + this.item.id;
-    await this.router.navigate(["generation", generationUrl], {relativeTo: this.route});
+    await this.router.navigate([generationUrl], {relativeTo: this.route});
   }
 }

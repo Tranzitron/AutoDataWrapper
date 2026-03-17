@@ -1,7 +1,7 @@
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {Generation, Trim} from "../../../../library/src/models";
+import {Generation, Trim} from "../../../../../library/src/models";
 import {ActivatedRoute, Router} from '@angular/router';
-import {ApiService} from '../api.service';
+import {ApiService} from '../../api.service';
 import {GenerationItemComponent} from './generation-item/generation-item.component';
 
 @Component({

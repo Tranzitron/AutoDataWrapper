@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Trim} from "../../../../../library/src/models";
-import {SlugifyPipe} from '../../slugify-pipe';
+import {Trim} from "../../../../../../library/src/models";
+import {SlugifyPipe} from '../../../slugify-pipe';
 
 @Component({
   selector: 'app-generation-item',
@@ -19,6 +19,6 @@ export class GenerationItemComponent {
   public async clicked() {
     let trimName = this.pipe.transform(this.item.name);
     let trimUrl = trimName + "-" + this.item.id;
-    await this.router.navigate(["trim", trimUrl], {relativeTo: this.route});
+    await this.router.navigate([trimUrl], {relativeTo: this.route});
   }
 }

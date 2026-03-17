@@ -1,7 +1,7 @@
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {ApiService} from '../api.service';
-import {Brand, Model} from '../../../../library/src/models'
+import {ApiService} from '../../api.service';
+import {Brand, Model} from '../../../../../library/src/models'
 import {BrandItemComponent} from './brand-item/brand-item.component';
 
 @Component({

@@ -1,14 +1,20 @@
 import {Routes} from '@angular/router';
-import {AllBrandsComponent} from './allbrands/all-brands.component';
-import {BrandComponent} from './brand/brand.component';
-import {ModelComponent} from './model/model.component';
-import {GenerationComponent} from './generation/generation.component';
+import {AllBrandsComponent} from './browse/allbrands/all-brands.component';
+import {BrandComponent} from './browse/brand/brand.component';
+import {ModelComponent} from './browse/model/model.component';
+import {GenerationComponent} from './browse/generation/generation.component';
+import {BrowseComponent} from './browse/browse.component';
 
 export const routes: Routes = [
-  {path: 'brands', component: AllBrandsComponent},
-  {path: 'brand/:brandId', component: BrandComponent},
-  {path: 'brand/:brandId/model/:modelId', component: ModelComponent},
-  {path: 'brand/:brandId/model/:modelId/generation/:generationId', component: GenerationComponent},
-  {path: '**', redirectTo: '/brands'},
-  {path: '*', redirectTo: '/brands'}
+  {
+    path: 'browse', component: BrowseComponent, children:
+      [
+        {path: '', component: AllBrandsComponent},
+        {path: ':brandId', component: BrandComponent},
+        {path: ':brandId/:modelId', component: ModelComponent},
+        {path: ':brandId/:modelId/:generationId', component: GenerationComponent},
+      ]
+  },
+  {path: '**', redirectTo: '/browse'},
+  {path: '*', redirectTo: '/browse'}
 ];

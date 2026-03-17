@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Model} from '../../../../../library/src/models'
-import {SlugifyPipe} from '../../slugify-pipe';
+import {Model} from '../../../../../../library/src/models'
+import {SlugifyPipe} from '../../../slugify-pipe';
 
 @Component({
   selector: 'app-brand-item',
@@ -19,6 +19,6 @@ export class BrandItemComponent {
   public async clicked() {
     let modelName = this.pipe.transform(this.item.name);
     let modelUrl = modelName + "-" + this.item.id;
-    await this.router.navigate(["model", modelUrl], {relativeTo: this.route});
+    await this.router.navigate([modelUrl], {relativeTo: this.route});
   }
 }
