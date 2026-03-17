@@ -22,11 +22,12 @@ router.get('/model/:modelId', (req: Request, res: Response) => {
     });
 });
 
-// router.get('/generation/:generationId', (req: Request, res: Response) => {
-//     getProvider().getGenerationWithTrims().then((data: any) => {
-//         res.json(data);
-//     });
-// });
+router.get('/generation/:generationId', (req: Request, res: Response) => {
+    let generationId: number = parseInt(<string>req.params.generationId);
+    getProvider().getGenerationWithTrims(generationId).then((data: any) => {
+        res.json(data);
+    });
+});
 
 function getProvider() {
     if (fetchProvider) {

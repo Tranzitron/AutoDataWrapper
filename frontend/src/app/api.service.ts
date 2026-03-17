@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {lastValueFrom} from 'rxjs';
-import {Brand, Model} from "../../../library/src/models";
+import {Brand, Generation, Model} from "../../../library/src/models";
 
 @Injectable({
   providedIn: 'root',
@@ -22,5 +22,9 @@ export class ApiService {
 
   async getModelWithGenerations(modelId: number): Promise<Model> {
     return await lastValueFrom(this.http.get<Model>(this.serverUrl + 'model/' + modelId));
+  }
+
+  async getGenerationWithTrims(generationId: number): Promise<Generation> {
+    return await lastValueFrom(this.http.get<Generation>(this.serverUrl + 'generation/' + generationId));
   }
 }

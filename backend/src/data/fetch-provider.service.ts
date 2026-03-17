@@ -1,6 +1,6 @@
 import "reflect-metadata"
 import {ScraperEngine} from './ScraperEngine';
-import {Brand, Generation, Model} from "../entity/entities";
+import {Brand, Generation, Model, Trim} from "../entity/entities";
 import {AppDataSource} from "../data-source";
 
 export class FetchProvider {
@@ -104,6 +104,36 @@ export class FetchProvider {
         return model;
     }
 
+    async getGenerationWithTrims(generationId: number): Promise<Generation | null> {
+        let generation: Generation | null = null;
+        try {
+            generation = await this.getStoredGenerationWithTrims(generationId);
+            if (generation == null) {
+                return null;
+            } else if (generation.trims == null || generation.trims.length == 0) {
+                const scrapedData = await this.scrapeTrimsByGenerationUrl(generation.url);
+                let trims: Trim[] = [];
+                scrapedData.forEach((item: any) => {
+                    let trim: Trim = new Trim();
+                    trim.name = item.name;
+                    trim.url = item.url;
+                    trim.startYear = item.startYear;
+                    trim.endYear = item.endYear;
+                    trim.generation = generation!;
+                    trims.push(trim);
+                })
+                await AppDataSource.manager.insert(Trim, trims);
+                await AppDataSource.manager.save(trims);
+                generation = await this.getStoredGenerationWithTrims(generationId);
+            }
+        } catch (e) {
+            console.log(e);
+        } finally {
+            await this.scraper.close();
+        }
+        return generation;
+    }
+
     //#endregion
 
     //#region Stored methods
@@ -148,6 +178,28 @@ export class FetchProvider {
         }
 
         return model;
+    }
+
+    private async getStoredGenerationWithTrims(generationId: number): Promise<Generation | null> {
+        const generation = await AppDataSource.manager.findOne(Generation, {
+            where: {
+                id: generationId,
+            },
+            relations: {
+                trims: true,
+                model: true,
+            },
+        });
+
+        if (generation == null) {
+            console.warn(`getStoredGenerationWithTrims: No Generation for generationId:${generationId}`);
+            return null;
+        } else if (generation.model == null) {
+            console.warn(`getStoredGenerationWithTrims: No Model for generationId:${generationId}`);
+            return null;
+        }
+
+        return generation;
     }
 
     //#endregion
@@ -234,6 +286,37 @@ export class FetchProvider {
                     }
                 })
                 .filter((generation) => generation.url) // Filter out any entries without href;
+        })
+    }
+
+    private async scrapeTrimsByGenerationUrl(generationUrl: string): Promise<any[]> {
+        const url = `https://www.auto-data.net/en/${generationUrl}`;
+
+        await this.scraper.initialize();
+        await this.scraper.goto(url);
+
+        return await this.scraper.page!.evaluate(() => {
+            const trimLinks = Array.from(document.querySelectorAll('table.carlist tr.i'));
+            return trimLinks
+                .map((element) => {
+                    const top = element.querySelector('th.i > a');
+                    const name = top?.querySelector('.tit')?.textContent.trim();
+                    const url = top?.getAttribute('href')?.split('/')[2];
+
+                    const yearCurElement = element.querySelector('.cur');
+                    const yearEndElement = element.querySelector('.end');
+                    const year = (yearCurElement ?? yearEndElement)?.textContent?.trim();
+                    const startYear = year?.split('-')[0].trim();
+                    const endYear = year?.split('-')[1].trim();
+
+                    return {
+                        name: name || '',
+                        url: url || '',
+                        startYear: startYear || '',
+                        endYear: endYear || '',
+                    }
+                })
+                .filter((trim) => trim.url) // Filter out any entries without href;
         })
     }
 
