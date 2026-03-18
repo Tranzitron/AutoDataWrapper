@@ -1,6 +1,6 @@
 import "reflect-metadata"
 import {ScraperEngine} from './ScraperEngine';
-import {Brand, Generation, Model, Trim} from "../entity/entities";
+import {Brand, Generation, Model, Trim, TrimDetails} from "../entity/entities";
 import {AppDataSource} from "../data-source";
 
 export class FetchProvider {
@@ -134,6 +134,28 @@ export class FetchProvider {
         return generation;
     }
 
+    async getTrimWithDetails(trimId: number): Promise<Trim | null> {
+        let trim: Trim | null = null;
+        try {
+            trim = await this.getStoredTrimWithTrimDetails(trimId);
+            if (trim == null) {
+                return null;
+            } else if (trim.trimDetails == null) {
+                const trimDetailsScraped: any = await this.scrapeTrimDetailsByTrimUrl(trim.url);
+                const trimDetails = Object.assign(new TrimDetails(), trimDetailsScraped) as TrimDetails;
+
+                await AppDataSource.manager.insert(TrimDetails, trimDetails);
+                await AppDataSource.manager.save(trimDetails);
+                trim = await this.getStoredTrimWithTrimDetails(trimId);
+            }
+        } catch (e) {
+            console.log(e);
+        } finally {
+            await this.scraper.close();
+        }
+        return trim;
+    }
+
     //#endregion
 
     //#region Stored methods
@@ -200,6 +222,29 @@ export class FetchProvider {
         }
 
         return generation;
+    }
+
+    private async getStoredTrimWithTrimDetails(trimId: number): Promise<Trim | null> {
+        const trim = await AppDataSource.manager.findOne(Trim, {
+            where: {
+                id: trimId,
+            },
+            relations: {
+                generation: true,
+                trimDetails: true,
+            },
+        });
+
+        if (trim == null) {
+            console.warn(`getStoredTrim: No Trim for trimId:${trimId}`);
+            return null;
+        }
+        /*else if (trim.trimDetails == null) {
+            console.warn(`getStoredTrim: No TrimDetails for trimId:${trimId}`);
+            return null;
+        }*/
+
+        return trim;
     }
 
     //#endregion
@@ -318,6 +363,133 @@ export class FetchProvider {
                 })
                 .filter((trim) => trim.url) // Filter out any entries without href;
         })
+    }
+
+    private async scrapeTrimDetailsByTrimUrl(trimUrl: string): Promise<any> {
+        const url = `https://www.auto-data.net/en/${trimUrl}`;
+
+        await this.scraper.initialize();
+        await this.scraper.goto(url);
+
+        return await this.scraper.page!.evaluate(() => {
+            const trimDetails: any = {};
+
+            const rows = document.querySelectorAll('table.cardetailsout tbody tr');
+
+            const cleanText = (element: Element | null): string => {
+                if (!element) return '';
+                return element.textContent?.trim().replace(/\s+/g, ' ') || '';
+            };
+
+            const getMainValue = (td: Element): string => {
+                const text = td.childNodes[0]?.textContent?.trim() || '';
+                return text.replace(/\s+/g, ' ').trim();
+            };
+
+            rows.forEach(row => {
+                const th = row.querySelector('th');
+                const td = row.querySelector('td');
+
+                if (!th || !td) return;
+
+                const label = cleanText(th).toLowerCase();
+                const value = getMainValue(td);
+
+                // Map the values to trimDetails properties
+                // General information
+                if (label.includes('brand')) trimDetails.brand = value;
+                else if (label.includes('model') && !label.includes('code')) trimDetails.model = value;
+                else if (label.includes('generation')) trimDetails.generation = value;
+                else if (label.includes('modification') || label.includes('engine)')) trimDetails.modification = value;
+                else if (label.includes('start of production')) trimDetails.startOfProduction = value;
+                else if (label.includes('end of production')) trimDetails.endOfProduction = value;
+                else if (label.includes('powertrain architecture')) trimDetails.powertrainArchitecture = value;
+                else if (label.includes('body type')) trimDetails.bodyType = value;
+                else if (label.includes('seats')) trimDetails.seats = value;
+                else if (label.includes('doors')) trimDetails.doors = value;
+
+                // Performance specs
+                else if (label.includes('fuel consumption') && label.includes('urban') && !label.includes('extra')) trimDetails.fuelConsumptionUrban = value;
+                else if (label.includes('fuel consumption') && label.includes('extra urban')) trimDetails.fuelConsumptionExtraUrban = value;
+                else if (label.includes('fuel consumption') && label.includes('combined')) trimDetails.fuelConsumptionCombined = value;
+                else if (label.includes('co2')) trimDetails.co2Emissions = value;
+                else if (label.includes('fuel type')) trimDetails.fuelType = value;
+                else if (label.includes('acceleration 0 - 100')) trimDetails.acceleration0100 = value;
+                else if (label.includes('acceleration 0 - 62')) trimDetails.acceleration062 = value;
+                else if (label.includes('acceleration 0 - 60')) trimDetails.acceleration060 = value;
+                else if (label.includes('maximum speed')) trimDetails.maximumSpeed = value;
+                else if (label.includes('emission standard')) trimDetails.emissionStandard = value;
+                else if (label.includes('weight-to-power')) trimDetails.weightToPowerRatio = value;
+                else if (label.includes('weight-to-torque')) trimDetails.weightToTorqueRatio = value;
+
+                // Engine specs
+                else if (label.includes('power') && !label.includes('steering')) trimDetails.power = value;
+                else if (label.includes('power per litre')) trimDetails.powerPerLitre = value;
+                else if (label.includes('torque')) trimDetails.torque = value;
+                else if (label.includes('engine layout')) trimDetails.engineLayout = value;
+                else if (label.includes('engine model') || label.includes('engine code')) trimDetails.engineModelCode = value;
+                else if (label.includes('engine displacement')) trimDetails.engineDisplacement = value;
+                else if (label.includes('number of cylinders')) trimDetails.numberOfCylinders = value;
+                else if (label.includes('engine configuration')) trimDetails.engineConfiguration = value;
+                else if (label.includes('cylinder bore')) trimDetails.cylinderBore = value;
+                else if (label.includes('piston stroke')) trimDetails.pistonStroke = value;
+                else if (label.includes('compression ratio')) trimDetails.compressionRatio = value;
+                else if (label.includes('valves per cylinder')) trimDetails.valvesPerCylinder = value;
+                else if (label.includes('fuel injection')) trimDetails.fuelInjectionSystem = value;
+                else if (label.includes('engine aspiration')) trimDetails.engineAspiration = value;
+                else if (label.includes('engine oil capacity')) trimDetails.engineOilCapacity = value;
+                else if (label.includes('engine oil specification')) {
+                    // Handle locked content
+                    const lockImg = td.querySelector('img.datalock');
+                    if (lockImg) {
+                        trimDetails.engineOilSpecification = '?';
+                    } else {
+                        trimDetails.engineOilSpecification = value;
+                    }
+                } else if (label.includes('coolant')) trimDetails.coolantCapacity = value;
+
+                // Space, Volume and weights
+                else if (label.includes('kerb weight') || label.includes('curb weight')) trimDetails.kerbWeight = value;
+                else if (label.includes('max. weight')) trimDetails.maxWeight = value;
+                else if (label.includes('max load')) trimDetails.maxLoad = value;
+                else if (label.includes('trunk') || label.includes('boot space')) trimDetails.trunkSpaceMin = value;
+                else if (label.includes('fuel tank capacity')) trimDetails.fuelTankCapacity = value;
+                else if (label.includes('max. roof load')) trimDetails.maxRoofLoad = value;
+                else if (label.includes('permitted trailer load with brakes')) trimDetails.permittedTrailerLoadWithBrakes = value;
+                else if (label.includes('permitted trailer load without brakes')) trimDetails.permittedTrailerLoadWithoutBrakes = value;
+                else if (label.includes('permitted towbar download')) trimDetails.permittedTowbarDownload = value;
+
+                // Dimensions
+                else if (label.includes('length')) trimDetails.length = value;
+                else if (label.includes('width') && !label.includes('including')) trimDetails.width = value;
+                else if (label.includes('width including mirrors')) trimDetails.widthIncludingMirrors = value;
+                else if (label.includes('height')) trimDetails.height = value;
+                else if (label.includes('wheelbase')) trimDetails.wheelbase = value;
+                else if (label.includes('front track')) trimDetails.frontTrack = value;
+                else if (label.includes('rear') && label.includes('track')) trimDetails.rearTrack = value;
+                else if (label.includes('ride height') || label.includes('ground clearance')) trimDetails.rideHeight = value;
+                else if (label.includes('drag coefficient')) trimDetails.dragCoefficient = value;
+                else if (label.includes('minimum turning circle')) trimDetails.minimumTurningCircle = value;
+
+                // Drivetrain, brakes and suspension
+                else if (label.includes('drive wheel')) trimDetails.driveWheel = value;
+                else if (label.includes('number of gears') || label.includes('gearbox')) trimDetails.gearbox = value;
+                else if (label.includes('front suspension')) trimDetails.frontSuspension = value;
+                else if (label.includes('rear suspension')) trimDetails.rearSuspension = value;
+                else if (label.includes('front brakes')) trimDetails.frontBrakes = value;
+                else if (label.includes('rear brakes')) trimDetails.rearBrakes = value;
+                else if (label.includes('assisting systems')) {
+                    const systems = Array.from(td.querySelectorAll('br')).map(() => '');
+                    const text = td.innerHTML.replace(/<br\s*\/?>/g, '|').replace(/<[^>]*>/g, '');
+                    trimDetails.assistingSystems = text.replace(/\|/g, ', ').trim();
+                } else if (label.includes('steering type') && !label.includes('power')) trimDetails.steeringType = value;
+                else if (label.includes('power steering')) trimDetails.powerSteering = value;
+                else if (label.includes('tires size') || label.includes('tyres size')) trimDetails.tiresSize = value;
+                else if (label.includes('wheel rims size')) trimDetails.wheelRimsSize = value;
+            });
+
+            return trimDetails;
+        });
     }
 
     //#endregion

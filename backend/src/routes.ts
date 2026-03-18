@@ -29,6 +29,13 @@ router.get('/generation/:generationId', (req: Request, res: Response) => {
     });
 });
 
+router.get('/trim/:trimId', (req: Request, res: Response) => {
+    let trimId: number = parseInt(<string>req.params.trimId);
+    getProvider().getTrimWithDetails(trimId).then((data: any) => {
+        res.json(data);
+    });
+});
+
 function getProvider() {
     if (fetchProvider) {
         return fetchProvider;

@@ -24,7 +24,7 @@ export class GenerationComponent implements OnInit {
     let generationId: number = parseInt(generationUrl.split("-")[1]);
     let tempGeneration: Generation = await this.api.getGenerationWithTrims(generationId);
     if (tempGeneration == null) {
-      console.log(`no model found for: ${generationUrl}`);
+      console.log(`no generation found for: ${generationUrl}`);
       await this.router.navigate([""]);
     }
     this.trims = tempGeneration!.trims;
