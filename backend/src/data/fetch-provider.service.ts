@@ -395,7 +395,6 @@ export class FetchProvider {
                 const label = cleanText(th).toLowerCase();
                 const value = getMainValue(td);
 
-                // Map the values to trimDetails properties
                 // General information
                 if (label.includes('brand')) trimDetails.brand = value;
                 else if (label.includes('model') && !label.includes('code')) trimDetails.model = value;
@@ -412,7 +411,7 @@ export class FetchProvider {
                 else if (label.includes('fuel consumption') && label.includes('urban') && !label.includes('extra')) trimDetails.fuelConsumptionUrban = value;
                 else if (label.includes('fuel consumption') && label.includes('extra urban')) trimDetails.fuelConsumptionExtraUrban = value;
                 else if (label.includes('fuel consumption') && label.includes('combined')) trimDetails.fuelConsumptionCombined = value;
-                else if (label.includes('co2')) trimDetails.co2Emissions = value;
+                else if (label.includes('co') && label.includes('emission')) trimDetails.co2Emissions = value;
                 else if (label.includes('fuel type')) trimDetails.fuelType = value;
                 else if (label.includes('acceleration 0 - 100')) trimDetails.acceleration0100 = value;
                 else if (label.includes('acceleration 0 - 62')) trimDetails.acceleration062 = value;
@@ -426,6 +425,7 @@ export class FetchProvider {
                 else if (label.includes('power') && !label.includes('steering')) trimDetails.power = value;
                 else if (label.includes('power per litre')) trimDetails.powerPerLitre = value;
                 else if (label.includes('torque')) trimDetails.torque = value;
+                else if (label.includes('maximum engine speed')) trimDetails.maximumEngineSpeed = value;
                 else if (label.includes('engine layout')) trimDetails.engineLayout = value;
                 else if (label.includes('engine model') || label.includes('engine code')) trimDetails.engineModelCode = value;
                 else if (label.includes('engine displacement')) trimDetails.engineDisplacement = value;
@@ -437,6 +437,7 @@ export class FetchProvider {
                 else if (label.includes('valves per cylinder')) trimDetails.valvesPerCylinder = value;
                 else if (label.includes('fuel injection')) trimDetails.fuelInjectionSystem = value;
                 else if (label.includes('engine aspiration')) trimDetails.engineAspiration = value;
+                else if (label.includes('valvetrain')) trimDetails.valvetrain = value;
                 else if (label.includes('engine oil capacity')) trimDetails.engineOilCapacity = value;
                 else if (label.includes('engine oil specification')) {
                     // Handle locked content

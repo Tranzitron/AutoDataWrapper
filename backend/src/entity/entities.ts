@@ -139,6 +139,9 @@ export class TrimDetails extends EntityBase {
     maximumSpeed: string = "";
 
     @Column()
+    maximumEngineSpeed: string = "";
+
+    @Column()
     emissionStandard: string = "";
 
     @Column()
@@ -189,6 +192,9 @@ export class TrimDetails extends EntityBase {
 
     @Column()
     engineAspiration: string = "";
+
+    @Column()
+    valvetrain: string = "";
 
     @Column()
     engineOilCapacity: string = "";
