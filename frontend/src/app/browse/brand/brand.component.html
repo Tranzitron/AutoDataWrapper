@@ -6,9 +6,10 @@
   <p>Showing models for ...</p>
 }
 
-
-@for (item of models; track item) {
-  <app-brand-item [item]="item"/>
-} @empty {
-  <p>Fetching models...</p>
-}
+<div class="models-container">
+  @for (item of models; track item) {
+    <app-brand-item [item]="item"/>
+  } @empty {
+    <p>Fetching models...</p>
+  }
+</div>

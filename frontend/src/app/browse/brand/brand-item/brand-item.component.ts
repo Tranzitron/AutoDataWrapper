@@ -2,10 +2,13 @@ import {Component, Input} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Model} from '../../../../../../library/src/models'
 import {SlugifyPipe} from '../../../slugify-pipe';
+import {DatePipe} from '@angular/common';
 
 @Component({
   selector: 'app-brand-item',
-  imports: [],
+  imports: [
+    DatePipe
+  ],
   templateUrl: './brand-item.component.html',
   styleUrl: './brand-item.component.css',
   providers: [SlugifyPipe]

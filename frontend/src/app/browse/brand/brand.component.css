@@ -1,0 +1,7 @@
+.models-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  max-width: 800px;
+}

@@ -1,3 +1,30 @@
-<a (click)="clicked()">
-  <p>{{ item.name }}</p>
+<a (click)="clicked()" class="model-item">
+  <div class="image-container">
+    <img [alt]="item.name" [src]="item.imageUrl || 'https://placehold.co/100x100?text=' + item.name"
+         class="model-image">
+  </div>
+  <div class="model-details">
+    <p class="model-name">{{ item.name }}</p>
+    <p class="model-years">
+      {{ item.startYear | date:'yyyy' }} -
+      @if (item.endYear) {
+        {{ item.endYear | date:'yyyy' }}
+      } @else {
+        Present
+      }
+    </p>
+  </div>
+  <div [class.stopped]="item.endYear" class="status-badge">
+    @if (item.endYear) {
+      <svg fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              stroke-width="2"/>
+      </svg>
+    } @else {
+      <svg fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5 12L10 17L19 7" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+              stroke-width="2"/>
+      </svg>
+    }
+  </div>
 </a>

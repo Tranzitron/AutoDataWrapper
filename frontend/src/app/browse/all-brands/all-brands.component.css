@@ -1,0 +1,76 @@
+.navigation-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  z-index: 100;
+  border-bottom: 1px solid #dee2e6;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.navigation-bar.floating {
+  position: fixed;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%) translateX(150%);
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(248, 249, 250, 0.9);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  padding: 0.5rem;
+  max-height: 90vh;
+  overflow-y: auto;
+  opacity: 0;
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out, visibility 0s linear 0.25s;
+  visibility: hidden;
+}
+
+.navigation-bar.floating.visible {
+  transform: translateY(-50%) translateX(0);
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.navigation-bar.floating .nav-letter {
+  font-size: 0.8rem;
+  padding: 0.15rem 0.3rem;
+}
+
+.nav-letter {
+  text-decoration: none;
+  color: #007bff;
+  font-weight: bold;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.nav-letter:hover {
+  background-color: #e9ecef;
+}
+
+.brands-container {
+  padding: 1rem;
+}
+
+.letter-section {
+  margin-bottom: 2rem;
+  scroll-margin-top: 2rem;
+}
+
+.letter-header {
+  border-bottom: 2px solid #343a40;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.letter-brands {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: flex-start;
+}

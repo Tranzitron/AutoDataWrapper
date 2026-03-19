@@ -1,9 +1,28 @@
-<p>all-brands works!</p>
+<h1>All Brands</h1>
 
-<p>Showing all brands</p>
+<div #navTrigger class="navigation-bar static">
+  @for (letter of letters; track letter) {
+    <a [fragment]="letter" [routerLink]="[]" class="nav-letter">{{ letter }}</a>
+  }
+</div>
 
-@for (item of brands; track item) {
-  <app-allbrands-item [item]="item"/>
-} @empty {
-  <p>Fetching brands...</p>
-}
+<div [class.visible]="isFloating" class="navigation-bar floating">
+  @for (letter of letters; track letter) {
+    <a [fragment]="letter" [routerLink]="[]" class="nav-letter">{{ letter }}</a>
+  }
+</div>
+
+<div class="brands-container">
+  @for (group of groupedBrands; track group.letter) {
+    <div [id]="group.letter" class="letter-section">
+      <h2 class="letter-header">{{ group.letter }}</h2>
+      <div class="letter-brands">
+        @for (item of group.brands; track item.id) {
+          <app-allbrands-item [item]="item"/>
+        }
+      </div>
+    </div>
+  } @empty {
+    <p>Fetching brands...</p>
+  }
+</div>
