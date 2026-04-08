@@ -308,10 +308,13 @@ export class Trim extends EntityBase {
     @Column()
     endYear: Date = new Date();
 
+    @Column("simple-array")
+    imageUrls: string[] = [];
+
     @ManyToOne(() => Generation, (generation) => generation.trims)
     generation!: Generation;
 
-    @OneToOne(() => TrimDetails)
+    @OneToOne(() => TrimDetails, {onDelete: "CASCADE"})
     @JoinColumn()
     trimDetails!: TrimDetails;
 }

@@ -26,7 +26,7 @@ export class FetchProvider {
                     let brand: Brand = new Brand();
                     brand.name = item.name;
                     brand.url = item.url;
-                    brand.imageUrl = "";
+                    brand.imageUrl = item.imageUrl;
                     tempBrands.push(brand);
                 })
                 await AppDataSource.manager.insert(Brand, tempBrands);
@@ -56,7 +56,7 @@ export class FetchProvider {
                     model.url = item.url;
                     model.startYear = item.startYear;
                     model.endYear = item.endYear;
-                    model.imageUrl = "";
+                    model.imageUrl = item.imageUrl;
                     model.brand = brand!;
                     models.push(model);
                 })
@@ -88,7 +88,7 @@ export class FetchProvider {
                     generation.startYear = item.startYear;
                     generation.endYear = item.endYear;
                     generation.chassisType = item.chassisType;
-                    generation.imageUrl = "";
+                    generation.imageUrl = item.imageUrl;
                     generation.model = model!;
                     generations.push(generation);
                 })
@@ -119,6 +119,7 @@ export class FetchProvider {
                     trim.url = item.url;
                     trim.startYear = item.startYear;
                     trim.endYear = item.endYear;
+                    trim.imageUrls = item.imageUrls
                     trim.generation = generation!;
                     trims.push(trim);
                 })
@@ -142,11 +143,17 @@ export class FetchProvider {
                 return null;
             } else if (trim.trimDetails == null) {
                 const trimDetailsScraped: any = await this.scrapeTrimDetailsByTrimUrl(trim.url);
-                const trimDetails = Object.assign(new TrimDetails(), trimDetailsScraped) as TrimDetails;
+                const trimDetails: TrimDetails = Object.assign(new TrimDetails(), trimDetailsScraped) as TrimDetails;
+
+                trim.trimDetails = trimDetails;
 
                 await AppDataSource.manager.insert(TrimDetails, trimDetails);
                 await AppDataSource.manager.save(trimDetails);
+                await AppDataSource.manager.insert(Trim, trim);
+                await AppDataSource.manager.save(trim);
                 trim = await this.getStoredTrimWithTrimDetails(trimId);
+                let a = '';
+                console.log(a);
             }
         } catch (e) {
             console.log(e);
@@ -259,13 +266,15 @@ export class FetchProvider {
         return await this.scraper.page!.evaluate(() => {
             const links = Array.from(document.querySelectorAll('div.brands > a'));
             return links
-                .map((a) => {
-                    const brandName = a.querySelector('strong')?.textContent?.trim();
-                    const url = a.getAttribute('href')?.split('/')[2];
+                .map((link) => {
+                    const brandName = link.querySelector('strong')?.textContent?.trim();
+                    const url = link.getAttribute('href')?.split('/')[2];
+                    const imageUrl = link.querySelector('img')?.getAttribute('src');
 
                     return {
                         name: brandName || '',
-                        url: url || ''
+                        url: url || '',
+                        imageUrl: imageUrl || ''
                     };
                 })
                 .filter((item) => item.url);
@@ -285,14 +294,17 @@ export class FetchProvider {
                 .map((link) => {
                     const name = link.querySelector('strong')?.textContent;
                     const url = link.getAttribute('href')?.split('/')[2];
-                    const startYear = link.querySelector('div')?.textContent?.split('-')[0].trim();
-                    const endYear = link.querySelector('div')?.textContent?.split('-')[1]?.trim();
+                    const year = link.querySelector('div')?.textContent;
+                    const startYear = year?.split('-')[0].trim();
+                    const endYear = year?.split('-')[1]?.trim();
+                    const imageUrl = link.querySelector('img')?.getAttribute('src');
 
                     return {
                         name: name || '',
                         url: url || '',
                         startYear: startYear || '',
                         endYear: endYear || '',
+                        imageUrl: imageUrl || '',
                     }
                 })
                 .filter((model) => model.url) // Filter out any entries without href;
@@ -312,6 +324,7 @@ export class FetchProvider {
                     const top = element.querySelector('th.i > a');
                     const name = top?.querySelector('strong')?.textContent.trim();
                     const url = top?.getAttribute('href')?.split('/')[2];
+                    const imageUrl = top?.querySelector('img')?.getAttribute('src');
 
                     const bottom = element.querySelector('td.i > a');
                     const chassisType = bottom?.querySelector('strong.chas')?.textContent.trim();
@@ -328,6 +341,7 @@ export class FetchProvider {
                         startYear: startYear || '',
                         endYear: endYear || '',
                         chassisType: chassisType || '',
+                        imageUrl: imageUrl || '',
                     }
                 })
                 .filter((generation) => generation.url) // Filter out any entries without href;
@@ -341,6 +355,10 @@ export class FetchProvider {
         await this.scraper.goto(url);
 
         return await this.scraper.page!.evaluate(() => {
+            const imageUrls: string[] = Array.from(document.querySelectorAll('div.carTitimg img')).map(value => {
+                return value.getAttribute('src') || '';
+            });
+
             const trimLinks = Array.from(document.querySelectorAll('table.carlist tr.i'));
             return trimLinks
                 .map((element) => {
@@ -359,6 +377,7 @@ export class FetchProvider {
                         url: url || '',
                         startYear: startYear || '',
                         endYear: endYear || '',
+                        imageUrls: imageUrls || []
                     }
                 })
                 .filter((trim) => trim.url) // Filter out any entries without href;
